@@ -1,4 +1,3 @@
-// internal/domain/book/book.go
 package book
 
 import "errors"
@@ -10,10 +9,12 @@ type Book struct {
 	Price float64
 }
 
-// Factory para garantir invariantes de negócio
 func NewBook(title string, isbn ISBN, price float64) (*Book, error) {
+	if title == "" {
+		return nil, errors.New("título é obrigatório")
+	}
 	if price <= 0 {
-		return nil, errors.New("preço inválido")
+		return nil, errors.New("preço inválido: deve ser maior que zero")
 	}
 	return &Book{Title: title, ISBN: isbn, Price: price}, nil
 }

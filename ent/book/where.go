@@ -73,6 +73,11 @@ func CreatedAt(v int64) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// ReleaseYear applies equality check predicate on the "release_year" field. It's identical to ReleaseYearEQ.
+func ReleaseYear(v int) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldReleaseYear, v))
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldTitle, v))
@@ -281,6 +286,46 @@ func CreatedAtLT(v int64) predicate.Book {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v int64) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// ReleaseYearEQ applies the EQ predicate on the "release_year" field.
+func ReleaseYearEQ(v int) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldReleaseYear, v))
+}
+
+// ReleaseYearNEQ applies the NEQ predicate on the "release_year" field.
+func ReleaseYearNEQ(v int) predicate.Book {
+	return predicate.Book(sql.FieldNEQ(FieldReleaseYear, v))
+}
+
+// ReleaseYearIn applies the In predicate on the "release_year" field.
+func ReleaseYearIn(vs ...int) predicate.Book {
+	return predicate.Book(sql.FieldIn(FieldReleaseYear, vs...))
+}
+
+// ReleaseYearNotIn applies the NotIn predicate on the "release_year" field.
+func ReleaseYearNotIn(vs ...int) predicate.Book {
+	return predicate.Book(sql.FieldNotIn(FieldReleaseYear, vs...))
+}
+
+// ReleaseYearGT applies the GT predicate on the "release_year" field.
+func ReleaseYearGT(v int) predicate.Book {
+	return predicate.Book(sql.FieldGT(FieldReleaseYear, v))
+}
+
+// ReleaseYearGTE applies the GTE predicate on the "release_year" field.
+func ReleaseYearGTE(v int) predicate.Book {
+	return predicate.Book(sql.FieldGTE(FieldReleaseYear, v))
+}
+
+// ReleaseYearLT applies the LT predicate on the "release_year" field.
+func ReleaseYearLT(v int) predicate.Book {
+	return predicate.Book(sql.FieldLT(FieldReleaseYear, v))
+}
+
+// ReleaseYearLTE applies the LTE predicate on the "release_year" field.
+func ReleaseYearLTE(v int) predicate.Book {
+	return predicate.Book(sql.FieldLTE(FieldReleaseYear, v))
 }
 
 // And groups predicates with the AND operator between them.

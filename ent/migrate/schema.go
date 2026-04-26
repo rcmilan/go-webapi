@@ -15,6 +15,7 @@ var (
 		{Name: "isbn", Type: field.TypeString, Unique: true, Size: 13},
 		{Name: "price", Type: field.TypeFloat64},
 		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "release_year", Type: field.TypeInt},
 	}
 	// BooksTable holds the schema information for the "books" table.
 	BooksTable = &schema.Table{

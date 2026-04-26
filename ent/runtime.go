@@ -57,6 +57,10 @@ func init() {
 	bookDescCreatedAt := bookFields[4].Descriptor()
 	// book.DefaultCreatedAt holds the default value on creation for the created_at field.
 	book.DefaultCreatedAt = bookDescCreatedAt.Default.(func() int64)
+	// bookDescReleaseYear is the schema descriptor for release_year field.
+	bookDescReleaseYear := bookFields[5].Descriptor()
+	// book.ReleaseYearValidator is a validator for the "release_year" field. It is called by the builders before save.
+	book.ReleaseYearValidator = bookDescReleaseYear.Validators[0].(func(int) error)
 	// bookDescID is the schema descriptor for id field.
 	bookDescID := bookFields[0].Descriptor()
 	// book.IDValidator is a validator for the "id" field. It is called by the builders before save.

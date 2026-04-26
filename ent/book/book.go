@@ -19,6 +19,8 @@ const (
 	FieldPrice = "price"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldReleaseYear holds the string denoting the release_year field in the database.
+	FieldReleaseYear = "release_year"
 	// Table holds the table name of the book in the database.
 	Table = "books"
 )
@@ -30,6 +32,7 @@ var Columns = []string{
 	FieldIsbn,
 	FieldPrice,
 	FieldCreatedAt,
+	FieldReleaseYear,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -51,6 +54,8 @@ var (
 	PriceValidator func(float64) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() int64
+	// ReleaseYearValidator is a validator for the "release_year" field. It is called by the builders before save.
+	ReleaseYearValidator func(int) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -81,4 +86,9 @@ func ByPrice(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByReleaseYear orders the results by the release_year field.
+func ByReleaseYear(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReleaseYear, opts...).ToFunc()
 }

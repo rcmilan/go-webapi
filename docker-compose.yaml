@@ -9,6 +9,11 @@ services:
       - "3306:3306"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   atlas:
     image: arigaio/atlas:latest
@@ -17,4 +22,5 @@ services:
       - .:/work
     working_dir: /work
     depends_on:
-      - mysql_db
+      mysql_db:
+        condition: service_healthy

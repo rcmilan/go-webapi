@@ -29,19 +29,21 @@ const (
 // BookMutation represents an operation that mutates the Book nodes in the graph.
 type BookMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uint32
-	title         *string
-	isbn          *string
-	price         *float64
-	addprice      *float64
-	created_at    *int64
-	addcreated_at *int64
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Book, error)
-	predicates    []predicate.Book
+	op              Op
+	typ             string
+	id              *uint32
+	title           *string
+	isbn            *string
+	price           *float64
+	addprice        *float64
+	created_at      *int64
+	addcreated_at   *int64
+	release_year    *int
+	addrelease_year *int
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*Book, error)
+	predicates      []predicate.Book
 }
 
 var _ ent.Mutation = (*BookMutation)(nil)
@@ -332,6 +334,62 @@ func (m *BookMutation) ResetCreatedAt() {
 	m.addcreated_at = nil
 }
 
+// SetReleaseYear sets the "release_year" field.
+func (m *BookMutation) SetReleaseYear(i int) {
+	m.release_year = &i
+	m.addrelease_year = nil
+}
+
+// ReleaseYear returns the value of the "release_year" field in the mutation.
+func (m *BookMutation) ReleaseYear() (r int, exists bool) {
+	v := m.release_year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReleaseYear returns the old "release_year" field's value of the Book entity.
+// If the Book object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookMutation) OldReleaseYear(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReleaseYear is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReleaseYear requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReleaseYear: %w", err)
+	}
+	return oldValue.ReleaseYear, nil
+}
+
+// AddReleaseYear adds i to the "release_year" field.
+func (m *BookMutation) AddReleaseYear(i int) {
+	if m.addrelease_year != nil {
+		*m.addrelease_year += i
+	} else {
+		m.addrelease_year = &i
+	}
+}
+
+// AddedReleaseYear returns the value that was added to the "release_year" field in this mutation.
+func (m *BookMutation) AddedReleaseYear() (r int, exists bool) {
+	v := m.addrelease_year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetReleaseYear resets all changes to the "release_year" field.
+func (m *BookMutation) ResetReleaseYear() {
+	m.release_year = nil
+	m.addrelease_year = nil
+}
+
 // Where appends a list predicates to the BookMutation builder.
 func (m *BookMutation) Where(ps ...predicate.Book) {
 	m.predicates = append(m.predicates, ps...)
@@ -366,7 +424,7 @@ func (m *BookMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BookMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.title != nil {
 		fields = append(fields, book.FieldTitle)
 	}
@@ -378,6 +436,9 @@ func (m *BookMutation) Fields() []string {
 	}
 	if m.created_at != nil {
 		fields = append(fields, book.FieldCreatedAt)
+	}
+	if m.release_year != nil {
+		fields = append(fields, book.FieldReleaseYear)
 	}
 	return fields
 }
@@ -395,6 +456,8 @@ func (m *BookMutation) Field(name string) (ent.Value, bool) {
 		return m.Price()
 	case book.FieldCreatedAt:
 		return m.CreatedAt()
+	case book.FieldReleaseYear:
+		return m.ReleaseYear()
 	}
 	return nil, false
 }
@@ -412,6 +475,8 @@ func (m *BookMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPrice(ctx)
 	case book.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case book.FieldReleaseYear:
+		return m.OldReleaseYear(ctx)
 	}
 	return nil, fmt.Errorf("unknown Book field %s", name)
 }
@@ -449,6 +514,13 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreatedAt(v)
 		return nil
+	case book.FieldReleaseYear:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReleaseYear(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Book field %s", name)
 }
@@ -463,6 +535,9 @@ func (m *BookMutation) AddedFields() []string {
 	if m.addcreated_at != nil {
 		fields = append(fields, book.FieldCreatedAt)
 	}
+	if m.addrelease_year != nil {
+		fields = append(fields, book.FieldReleaseYear)
+	}
 	return fields
 }
 
@@ -475,6 +550,8 @@ func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedPrice()
 	case book.FieldCreatedAt:
 		return m.AddedCreatedAt()
+	case book.FieldReleaseYear:
+		return m.AddedReleaseYear()
 	}
 	return nil, false
 }
@@ -497,6 +574,13 @@ func (m *BookMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddCreatedAt(v)
+		return nil
+	case book.FieldReleaseYear:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddReleaseYear(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Book numeric field %s", name)
@@ -536,6 +620,9 @@ func (m *BookMutation) ResetField(name string) error {
 		return nil
 	case book.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case book.FieldReleaseYear:
+		m.ResetReleaseYear()
 		return nil
 	}
 	return fmt.Errorf("unknown Book field %s", name)

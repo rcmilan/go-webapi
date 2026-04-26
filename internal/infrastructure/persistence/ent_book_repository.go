@@ -22,6 +22,7 @@ func (r *EntBookRepository) Create(ctx context.Context, b *book.Book) error {
 		SetTitle(b.Title).
 		SetIsbn(b.ISBN.String()).
 		SetPrice(b.Price).
+		SetReleaseYear(b.ReleaseYear).
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("ent: create book: %w", err)
@@ -83,9 +84,10 @@ func toDomainBook(e *ent.Book) (*book.Book, error) {
 		return nil, fmt.Errorf("ent: invalid isbn in database %q: %w", e.Isbn, err)
 	}
 	return &book.Book{
-		ID:    e.ID,
-		Title: e.Title,
-		ISBN:  isbn,
-		Price: e.Price,
+		ID:          e.ID,
+		Title:       e.Title,
+		ISBN:        isbn,
+		Price:       e.Price,
+		ReleaseYear: e.ReleaseYear,
 	}, nil
 }

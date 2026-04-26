@@ -2,22 +2,26 @@
 
 This project uses [Ent](https://entgo.io) as the ORM and [Atlas](https://atlasgo.io) to manage versioned SQL migrations.
 
+Atlas runs exclusively via Docker — no local installation needed.
+
 ## How it works
 
 ```
-ent/schema/book.go          ← you edit this (source of truth)
+ent/schema/book.go               ← you edit this (source of truth)
         │
         ▼
-go generate ./ent/...       ← regenerates ent/ Go code
+go generate ./ent/...            ← regenerates ent/ Go code
         │
         ▼
-go run ./cmd/migrate        ← syncs schema into bookstore_dev
+go run ./cmd/migrate             ← syncs schema into bookstore_dev
         │
         ▼
-atlas migrate diff <name>   ← compares bookstore_dev vs migrations dir → writes .sql file
+docker compose run --rm atlas \
+  migrate diff <name>            ← compares bookstore_dev vs migrations dir → writes .sql file
         │
         ▼
-atlas migrate apply         ← applies pending .sql files to bookstore_db
+docker compose run --rm atlas \
+  migrate apply                  ← applies pending .sql files to bookstore_db
 ```
 
 Three databases are used:
@@ -32,8 +36,11 @@ Three databases are used:
 
 ## Prerequisites
 
-- Docker running: `docker compose up -d`
-- Atlas CLI installed at `~/go/bin/atlas.exe` (already set up)
+Docker running:
+
+```bash
+docker compose up -d
+```
 
 ---
 
@@ -52,14 +59,14 @@ go generate ./ent/...
 go run ./cmd/migrate
 
 # 4. Generate the versioned SQL migration file
-atlas migrate diff <name> --env local
-#    Example: atlas migrate diff add_author_field --env local
+docker compose run --rm atlas migrate diff <name> --env docker
+#    Example: docker compose run --rm atlas migrate diff add_author_field --env docker
 
 # 5. Review the generated file in ent/migrate/migrations/
 #    Always read the SQL before applying it.
 
 # 6. Apply to your local bookstore_db
-atlas migrate apply --env local
+docker compose run --rm atlas migrate apply --env docker
 ```
 
 Steps 2 and 3 are also available as VS Code tasks (`ent: generate` and `migrate: sync dev db`).
@@ -68,13 +75,7 @@ Steps 2 and 3 are also available as VS Code tasks (`ent: generate` and `migrate:
 
 ## Applying migrations (after pulling new code)
 
-If a teammate added a migration, apply it after pulling:
-
 ```bash
-# Locally
-atlas migrate apply --env local
-
-# Via Docker (no local Atlas CLI needed)
 docker compose run --rm atlas migrate apply --env docker
 ```
 
@@ -85,9 +86,6 @@ Atlas is idempotent — it tracks which migrations have been applied and skips t
 ## Checking migration status
 
 ```bash
-atlas migrate status --env local
-
-# or via Docker
 docker compose run --rm atlas migrate status --env docker
 ```
 
@@ -101,8 +99,8 @@ Atlas does not auto-generate rollback SQL. The correct approach is to write a ne
 
 ```bash
 # 1. Create an empty migration file
-atlas migrate new revert_<name> --env local
-#    Example: atlas migrate new revert_add_author_field --env local
+docker compose run --rm atlas migrate new revert_<name> --env docker
+#    Example: docker compose run --rm atlas migrate new revert_add_author_field --env docker
 
 # 2. Open the generated .sql file in ent/migrate/migrations/ and write the reverse DDL
 #    Examples:
@@ -110,7 +108,7 @@ atlas migrate new revert_<name> --env local
 #      ALTER TABLE `books` MODIFY `price` float NOT NULL;
 
 # 3. Apply it
-atlas migrate apply --env local
+docker compose run --rm atlas migrate apply --env docker
 ```
 
 For local development, it is often faster to just reset the database and re-apply everything from scratch:
@@ -119,7 +117,7 @@ For local development, it is often faster to just reset the database and re-appl
 docker exec bookstore_mysql mysql -uroot -proot_password \
   -e "DROP DATABASE bookstore_db; CREATE DATABASE bookstore_db;"
 
-atlas migrate apply --env local
+docker compose run --rm atlas migrate apply --env docker
 ```
 
 ---
@@ -129,10 +127,78 @@ atlas migrate apply --env local
 Run this in CI to detect tampered or missing migration files:
 
 ```bash
-atlas migrate validate --env local
+docker compose run --rm atlas migrate validate --env docker
 ```
 
 Atlas maintains an `atlas.sum` checksum file alongside the SQL files. This command verifies that all files are consistent with it.
+
+---
+
+## Adding a new field (end-to-end example)
+
+Changes always start from the domain and ripple outward. Never start from the database.
+
+```
+internal/domain/book/book.go    ← 1. add field to aggregate + validate in NewBook
+ent/schema/book.go              ← 2. add field to Ent schema
+go generate ./ent/...           ← 3. regenerate Ent code
+ent_book_repository.go          ← 4. update Create (SetX) and toDomainBook (map it back)
+internal/application/           ← 5. update command DTO and service
+internal/interface/api/         ← 6. update API input/output structs
+go run ./cmd/migrate            ← 7. sync schema to bookstore_dev
+atlas migrate diff <name>       ← 8. generate the SQL migration file
+atlas migrate apply             ← 9. apply to bookstore_db
+```
+
+**Example — adding `ReleaseYear`:**
+
+**Step 1 — Domain** (`internal/domain/book/book.go`)
+```go
+type Book struct {
+    ID          uint32
+    Title       string
+    ISBN        ISBN
+    Price       float64
+    ReleaseYear int        // ← new
+}
+
+func NewBook(title string, isbn ISBN, price float64, releaseYear int) (*Book, error) {
+    if releaseYear < 1450 {
+        return nil, errors.New("ano de lançamento inválido")
+    }
+    ...
+}
+```
+
+**Step 2 — Ent schema** (`ent/schema/book.go`)
+```go
+field.Int("release_year").Positive(),
+```
+
+**Step 3 — Regenerate**
+```bash
+go generate ./ent/...
+```
+
+**Step 4 — Repository** (`internal/infrastructure/persistence/ent_book_repository.go`)
+```go
+// in Create:
+SetReleaseYear(b.ReleaseYear).
+
+// in toDomainBook:
+ReleaseYear: e.ReleaseYear,
+```
+
+**Step 5 — Application layer** — add `ReleaseYear int` to `RegisterBookCommand`, pass it to `NewBook` in the service.
+
+**Step 6 — API layer** — add `ReleaseYear int` to the handler input/output structs with a `minimum: 1450` validation tag.
+
+**Steps 7–9 — Migration**
+```bash
+go run ./cmd/migrate
+docker compose run --rm atlas migrate diff add_release_year --env docker
+docker compose run --rm atlas migrate apply --env docker
+```
 
 ---
 

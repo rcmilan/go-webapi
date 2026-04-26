@@ -51,6 +51,12 @@ func (_c *BookCreate) SetNillableCreatedAt(v *int64) *BookCreate {
 	return _c
 }
 
+// SetReleaseYear sets the "release_year" field.
+func (_c *BookCreate) SetReleaseYear(v int) *BookCreate {
+	_c.mutation.SetReleaseYear(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *BookCreate) SetID(v uint32) *BookCreate {
 	_c.mutation.SetID(v)
@@ -127,6 +133,14 @@ func (_c *BookCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Book.created_at"`)}
 	}
+	if _, ok := _c.mutation.ReleaseYear(); !ok {
+		return &ValidationError{Name: "release_year", err: errors.New(`ent: missing required field "Book.release_year"`)}
+	}
+	if v, ok := _c.mutation.ReleaseYear(); ok {
+		if err := book.ReleaseYearValidator(v); err != nil {
+			return &ValidationError{Name: "release_year", err: fmt.Errorf(`ent: validator failed for field "Book.release_year": %w`, err)}
+		}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := book.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Book.id": %w`, err)}
@@ -179,6 +193,10 @@ func (_c *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(book.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.ReleaseYear(); ok {
+		_spec.SetField(book.FieldReleaseYear, field.TypeInt, value)
+		_node.ReleaseYear = value
 	}
 	return _node, _spec
 }

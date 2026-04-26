@@ -20,7 +20,7 @@ func (s *BookService) RegisterBook(ctx context.Context, cmd RegisterBookCommand)
 		if err != nil {
 			return ErrValidation{Msg: err.Error()}
 		}
-		b, err := book.NewBook(cmd.Title, isbn, cmd.Price)
+		b, err := book.NewBook(cmd.Title, isbn, cmd.Price, cmd.ReleaseYear)
 		if err != nil {
 			return ErrValidation{Msg: err.Error()}
 		}

@@ -1,9 +1,10 @@
 package application
 
 type RegisterBookCommand struct {
-	Title string
-	ISBN  string
-	Price float64
+	Title       string
+	ISBN        string
+	Price       float64
+	ReleaseYear int
 }
 
 type BookFilter struct {

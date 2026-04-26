@@ -76,6 +76,27 @@ func (_u *BookUpdate) AddPrice(v float64) *BookUpdate {
 	return _u
 }
 
+// SetReleaseYear sets the "release_year" field.
+func (_u *BookUpdate) SetReleaseYear(v int) *BookUpdate {
+	_u.mutation.ResetReleaseYear()
+	_u.mutation.SetReleaseYear(v)
+	return _u
+}
+
+// SetNillableReleaseYear sets the "release_year" field if the given value is not nil.
+func (_u *BookUpdate) SetNillableReleaseYear(v *int) *BookUpdate {
+	if v != nil {
+		_u.SetReleaseYear(*v)
+	}
+	return _u
+}
+
+// AddReleaseYear adds value to the "release_year" field.
+func (_u *BookUpdate) AddReleaseYear(v int) *BookUpdate {
+	_u.mutation.AddReleaseYear(v)
+	return _u
+}
+
 // Mutation returns the BookMutation object of the builder.
 func (_u *BookUpdate) Mutation() *BookMutation {
 	return _u.mutation
@@ -125,6 +146,11 @@ func (_u *BookUpdate) check() error {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Book.price": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReleaseYear(); ok {
+		if err := book.ReleaseYearValidator(v); err != nil {
+			return &ValidationError{Name: "release_year", err: fmt.Errorf(`ent: validator failed for field "Book.release_year": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -151,6 +177,12 @@ func (_u *BookUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedPrice(); ok {
 		_spec.AddField(book.FieldPrice, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.ReleaseYear(); ok {
+		_spec.SetField(book.FieldReleaseYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedReleaseYear(); ok {
+		_spec.AddField(book.FieldReleaseYear, field.TypeInt, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -221,6 +253,27 @@ func (_u *BookUpdateOne) AddPrice(v float64) *BookUpdateOne {
 	return _u
 }
 
+// SetReleaseYear sets the "release_year" field.
+func (_u *BookUpdateOne) SetReleaseYear(v int) *BookUpdateOne {
+	_u.mutation.ResetReleaseYear()
+	_u.mutation.SetReleaseYear(v)
+	return _u
+}
+
+// SetNillableReleaseYear sets the "release_year" field if the given value is not nil.
+func (_u *BookUpdateOne) SetNillableReleaseYear(v *int) *BookUpdateOne {
+	if v != nil {
+		_u.SetReleaseYear(*v)
+	}
+	return _u
+}
+
+// AddReleaseYear adds value to the "release_year" field.
+func (_u *BookUpdateOne) AddReleaseYear(v int) *BookUpdateOne {
+	_u.mutation.AddReleaseYear(v)
+	return _u
+}
+
 // Mutation returns the BookMutation object of the builder.
 func (_u *BookUpdateOne) Mutation() *BookMutation {
 	return _u.mutation
@@ -283,6 +336,11 @@ func (_u *BookUpdateOne) check() error {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Book.price": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReleaseYear(); ok {
+		if err := book.ReleaseYearValidator(v); err != nil {
+			return &ValidationError{Name: "release_year", err: fmt.Errorf(`ent: validator failed for field "Book.release_year": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -326,6 +384,12 @@ func (_u *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) {
 	}
 	if value, ok := _u.mutation.AddedPrice(); ok {
 		_spec.AddField(book.FieldPrice, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.ReleaseYear(); ok {
+		_spec.SetField(book.FieldReleaseYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedReleaseYear(); ok {
+		_spec.AddField(book.FieldReleaseYear, field.TypeInt, value)
 	}
 	_node = &Book{config: _u.config}
 	_spec.Assign = _node.assignValues

@@ -23,7 +23,9 @@ type Book struct {
 	// Price holds the value of the "price" field.
 	Price float64 `json:"price,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    int64 `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// ReleaseYear holds the value of the "release_year" field.
+	ReleaseYear  int `json:"release_year,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -34,7 +36,7 @@ func (*Book) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case book.FieldPrice:
 			values[i] = new(sql.NullFloat64)
-		case book.FieldID, book.FieldCreatedAt:
+		case book.FieldID, book.FieldCreatedAt, book.FieldReleaseYear:
 			values[i] = new(sql.NullInt64)
 		case book.FieldTitle, book.FieldIsbn:
 			values[i] = new(sql.NullString)
@@ -83,6 +85,12 @@ func (_m *Book) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatedAt = value.Int64
 			}
+		case book.FieldReleaseYear:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field release_year", values[i])
+			} else if value.Valid {
+				_m.ReleaseYear = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -130,6 +138,9 @@ func (_m *Book) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatedAt))
+	builder.WriteString(", ")
+	builder.WriteString("release_year=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReleaseYear))
 	builder.WriteByte(')')
 	return builder.String()
 }

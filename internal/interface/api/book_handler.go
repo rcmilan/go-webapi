@@ -27,17 +27,19 @@ func NewBookHandler(s *application.BookService) *BookHandler {
 // ── DTOs ────────────────────────────────────────────────────────────────────
 
 type bookDTO struct {
-	ID    uint32  `json:"id"`
-	Title string  `json:"title"`
-	ISBN  string  `json:"isbn"`
-	Price float64 `json:"price"`
+	ID          uint32  `json:"id"`
+	Title       string  `json:"title"`
+	ISBN        string  `json:"isbn"`
+	Price       float64 `json:"price"`
+	ReleaseYear int     `json:"release_year"`
 }
 
 type createBookInput struct {
 	Body struct {
-		Title string  `json:"title" doc:"Book title" minLength:"1"`
-		ISBN  string  `json:"isbn" doc:"13-digit ISBN" minLength:"13" maxLength:"13"`
-		Price float64 `json:"price" doc:"Book price" minimum:"0.01"`
+		Title       string  `json:"title" doc:"Book title" minLength:"1"`
+		ISBN        string  `json:"isbn" doc:"13-digit ISBN" minLength:"13" maxLength:"13"`
+		Price       float64 `json:"price" doc:"Book price" minimum:"0.01"`
+		ReleaseYear int     `json:"release_year" doc:"Year the book was released"`
 	}
 }
 

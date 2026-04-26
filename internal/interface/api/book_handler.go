@@ -87,7 +87,7 @@ func (h *BookHandler) createBook(ctx context.Context, input *createBookInput) (*
 		ReleaseYear: input.Body.ReleaseYear,
 	})
 	if err != nil {
-		return nil, mapError(err)
+		return nil, mapError(ctx, err)
 	}
 	return &createBookOutput{Body: toBookDTO(result)}, nil
 }
@@ -95,7 +95,7 @@ func (h *BookHandler) createBook(ctx context.Context, input *createBookInput) (*
 func (h *BookHandler) getBook(ctx context.Context, input *getBookInput) (*getBookOutput, error) {
 	result, err := h.service.GetBook(ctx, input.ID)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, mapError(ctx, err)
 	}
 	return &getBookOutput{Body: toBookDTO(result)}, nil
 }
@@ -103,7 +103,7 @@ func (h *BookHandler) getBook(ctx context.Context, input *getBookInput) (*getBoo
 func (h *BookHandler) listBooks(ctx context.Context, input *listBooksInput) (*listBooksOutput, error) {
 	results, err := h.service.ListBooks(ctx, application.BookFilter{ID: input.ID, ISBN: input.ISBN})
 	if err != nil {
-		return nil, mapError(err)
+		return nil, mapError(ctx, err)
 	}
 	out := &listBooksOutput{}
 	out.Body.Books = toBookDTOs(results)

@@ -3,12 +3,15 @@ package api
 import (
 	"bookstore-api/internal/application"
 	"bookstore-api/internal/domain/book"
+	"bookstore-api/internal/observability"
+	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func mapError(err error) error {
+func mapError(ctx context.Context, err error) error {
 	var validation application.ErrValidation
 	if errors.As(err, &validation) {
 		return huma.Error400BadRequest(validation.Error())
@@ -21,5 +24,6 @@ func mapError(err error) error {
 	if errors.As(err, &conflict) {
 		return huma.Error409Conflict(conflict.Error())
 	}
+	observability.FromContext(ctx).Error("unhandled error", slog.String("error", err.Error()))
 	return huma.Error500InternalServerError("erro interno")
 }

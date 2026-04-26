@@ -76,7 +76,9 @@ docker compose run --rm atlas migrate diff <name> --env docker
 docker compose run --rm atlas migrate apply --env docker
 ```
 
-Steps 2 and 3 are also available as VS Code tasks (`ent: generate` and `migrate: sync dev db`).
+Steps 2–6 are also available as a single VS Code task: **migrate: new** (`Ctrl+Shift+P → Tasks: Run Task → migrate: new`).
+It runs `go mod tidy → go generate → cmd/migrate → atlas migrate diff → atlas migrate apply` in order and prompts for the migration name before starting.
+Any step failure aborts the chain.
 
 ### Why `go mod tidy` can break `go generate`
 
@@ -180,24 +182,26 @@ atlas migrate apply             ← 9. apply to bookstore_db
 **Step 1 — Domain** (`internal/domain/book/book.go`)
 ```go
 type Book struct {
-    ID          uint32
+    ID          BookID
     Title       string
     ISBN        ISBN
-    Price       float64
-    ReleaseYear int        // ← new
+    Price       Price
+    ReleaseYear int    // ← new
 }
 
-func NewBook(title string, isbn ISBN, price float64, releaseYear int) (*Book, error) {
-    if releaseYear < 1450 {
-        return nil, errors.New("ano de lançamento inválido")
+func NewBook(title string, isbn ISBN, price Price, releaseYear int) (*Book, error) {
+    if title == "" {
+        return nil, errors.New("título é obrigatório")
     }
-    ...
+    return &Book{Title: title, ISBN: isbn, Price: price, ReleaseYear: releaseYear}, nil
 }
 ```
 
+> Price validation lives in `NewPrice`, not here. New value objects follow the same pattern.
+
 **Step 2 — Ent schema** (`ent/schema/book.go`)
 ```go
-field.Int("release_year").Positive(),
+field.Int("release_year").Optional(),
 ```
 
 **Step 3 — Regenerate**
@@ -211,12 +215,20 @@ go generate ./ent/...
 SetReleaseYear(b.ReleaseYear).
 
 // in toDomainBook:
-ReleaseYear: e.ReleaseYear,
+return &book.Book{
+    ID:          book.BookID(e.ID),
+    Title:       e.Title,
+    ISBN:        isbn,
+    Price:       price,
+    ReleaseYear: e.ReleaseYear,   // ← new
+}, nil
 ```
 
-**Step 5 — Application layer** — add `ReleaseYear int` to `RegisterBookCommand`, pass it to `NewBook` in the service.
+> Primitive ent types are converted to domain value objects in `toDomainBook`. If the new field has its own value object, construct it here (like `NewPrice` / `NewISBN`) and handle the error before building the struct.
 
-**Step 6 — API layer** — add `ReleaseYear int` to the handler input/output structs with a `minimum: 1450` validation tag.
+**Step 5 — Application layer** — add `ReleaseYear int` to `RegisterBookCommand` and `BookResult`; pass it through the service and `toResult`.
+
+**Step 6 — API layer** — add `ReleaseYear int` to `createBookInput.Body` and `bookDTO`.
 
 **Steps 7–9 — Migration**
 ```bash
@@ -235,11 +247,12 @@ The Ent schema lives in `ent/schema/`. Each file defines one entity (database ta
 // ent/schema/book.go
 func (Book) Fields() []ent.Field {
     return []ent.Field{
-        field.Uint32("id").SchemaType(map[string]string{dialect.MySQL: "int unsigned"}).Immutable(),
+        field.Uint32("id").SchemaType(map[string]string{dialect.MySQL: "int unsigned"}).Positive().Immutable(),
         field.String("title").MaxLen(255).NotEmpty(),
         field.String("isbn").MaxLen(13).Unique().NotEmpty(),
         field.Float("price").Positive(),
         field.Int64("created_at").Immutable().DefaultFunc(...),
+        field.Int("release_year").Optional(),
     }
 }
 ```

@@ -8,22 +8,17 @@
       "problemMatcher": []
     },
     {
-      "label": "docker: stop",
+      "label": "migrate: new",
       "type": "shell",
-      "command": "docker compose down",
+      "command": "go mod tidy && go generate ./ent/... && go run ./cmd/migrate && docker compose run --rm atlas migrate diff ${input:migrationName} --env docker && docker compose run --rm atlas migrate apply --env docker",
       "problemMatcher": []
-    },
+    }
+  ],
+  "inputs": [
     {
-      "label": "ent: generate",
-      "type": "shell",
-      "command": "go generate ./ent/...",
-      "problemMatcher": "$go"
-    },
-    {
-      "label": "migrate: sync dev db",
-      "type": "shell",
-      "command": "go run ./cmd/migrate",
-      "problemMatcher": []
+      "id": "migrationName",
+      "type": "promptString",
+      "description": "Migration name (e.g. add_author_field)"
     }
   ]
 }

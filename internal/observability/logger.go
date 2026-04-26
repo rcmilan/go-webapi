@@ -18,7 +18,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-const otlpEndpoint = "http://localhost:4318"
+const otlpHost = "localhost:4318"
 
 type contextKey struct{}
 
@@ -51,7 +51,8 @@ func Setup(ctx context.Context) (func(), error) {
 	// ── Traces → Tempo ────────────────────────────────────────────────────────
 	// WithEndpointURL forces HTTP — the SDK defaults to HTTPS.
 	traceExp, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpointURL(otlpEndpoint),
+		otlptracehttp.WithEndpoint(otlpHost),
+		otlptracehttp.WithInsecure(),
 	)
 	if err != nil {
 		return nil, err
@@ -64,19 +65,21 @@ func Setup(ctx context.Context) (func(), error) {
 
 	// ── Logs → Loki ───────────────────────────────────────────────────────────
 	logExp, err := otlploghttp.New(ctx,
-		otlploghttp.WithEndpointURL(otlpEndpoint),
+		otlploghttp.WithEndpoint(otlpHost),
+		otlploghttp.WithInsecure(),
 	)
 	if err != nil {
 		return nil, err
 	}
 	lp := sdklog.NewLoggerProvider(
-		sdklog.WithProcessor(sdklog.NewBatchProcessor(logExp)),
+		sdklog.WithProcessor(sdklog.NewSimpleProcessor(logExp)),
 		sdklog.WithResource(res),
 	)
 
 	// ── Metrics → Prometheus ──────────────────────────────────────────────────
 	metricExp, err := otlpmetrichttp.New(ctx,
-		otlpmetrichttp.WithEndpointURL(otlpEndpoint),
+		otlpmetrichttp.WithEndpoint(otlpHost),
+		otlpmetrichttp.WithInsecure(),
 	)
 	if err != nil {
 		return nil, err
@@ -92,7 +95,7 @@ func Setup(ctx context.Context) (func(), error) {
 	otelHandler := otelslog.NewHandler("bookstore-api", otelslog.WithLoggerProvider(lp))
 	slog.SetDefault(slog.New(newMultiHandler(jsonHandler, otelHandler)))
 
-	slog.Info("observability iniciada", slog.String("otlp_endpoint", otlpEndpoint))
+	slog.Info("observability iniciada", slog.String("otlp_host", otlpHost))
 
 	shutdown := func() {
 		_ = tp.Shutdown(ctx)

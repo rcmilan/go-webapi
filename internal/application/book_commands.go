@@ -1,5 +1,7 @@
 package application
 
+import "bookstore-api/internal/domain/book"
+
 type RegisterBookCommand struct {
 	Title       string
 	ISBN        string
@@ -8,12 +10,12 @@ type RegisterBookCommand struct {
 }
 
 type BookFilter struct {
-	ID   uint32
+	ID   book.BookID
 	ISBN string
 }
 
 type BookResult struct {
-	ID          uint32
+	ID          book.BookID
 	Title       string
 	ISBN        string
 	Price       float64

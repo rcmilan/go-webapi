@@ -2,6 +2,7 @@ package api
 
 import (
 	"bookstore-api/internal/application"
+	"bookstore-api/internal/domain/book"
 	"context"
 	"net/http"
 
@@ -12,7 +13,7 @@ import (
 // Defined here, consumed here — idiomatic Go.
 type bookService interface {
 	RegisterBook(ctx context.Context, cmd application.RegisterBookCommand) (*application.BookResult, error)
-	GetBook(ctx context.Context, id uint32) (*application.BookResult, error)
+	GetBook(ctx context.Context, id book.BookID) (*application.BookResult, error)
 	ListBooks(ctx context.Context, filter application.BookFilter) ([]*application.BookResult, error)
 }
 
@@ -27,11 +28,11 @@ func NewBookHandler(s *application.BookService) *BookHandler {
 // ── DTOs ────────────────────────────────────────────────────────────────────
 
 type bookDTO struct {
-	ID          uint32  `json:"id"`
-	Title       string  `json:"title"`
-	ISBN        string  `json:"isbn"`
-	Price       float64 `json:"price"`
-	ReleaseYear int     `json:"release_year"`
+	ID          book.BookID `json:"id"`
+	Title       string      `json:"title"`
+	ISBN        string      `json:"isbn"`
+	Price       float64     `json:"price"`
+	ReleaseYear int         `json:"release_year"`
 }
 
 type createBookInput struct {
@@ -46,14 +47,14 @@ type createBookInput struct {
 type createBookOutput struct{ Body bookDTO }
 
 type getBookInput struct {
-	ID uint32 `path:"id" doc:"Book ID"`
+	ID book.BookID `path:"id" doc:"Book ID"`
 }
 
 type getBookOutput struct{ Body bookDTO }
 
 type listBooksInput struct {
-	ID   uint32 `query:"id" doc:"Filter by book ID"`
-	ISBN string `query:"isbn" doc:"Filter by ISBN"`
+	ID   book.BookID `query:"id" doc:"Filter by book ID"`
+	ISBN string      `query:"isbn" doc:"Filter by ISBN"`
 }
 
 type listBooksOutput struct {

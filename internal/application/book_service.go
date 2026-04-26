@@ -20,7 +20,11 @@ func (s *BookService) RegisterBook(ctx context.Context, cmd RegisterBookCommand)
 		if err != nil {
 			return ErrValidation{Msg: err.Error()}
 		}
-		b, err := book.NewBook(cmd.Title, isbn, cmd.Price, cmd.ReleaseYear)
+		price, err := book.NewPrice(cmd.Price)
+		if err != nil {
+			return ErrValidation{Msg: err.Error()}
+		}
+		b, err := book.NewBook(cmd.Title, isbn, price, cmd.ReleaseYear)
 		if err != nil {
 			return ErrValidation{Msg: err.Error()}
 		}
@@ -33,7 +37,7 @@ func (s *BookService) RegisterBook(ctx context.Context, cmd RegisterBookCommand)
 	return result, err
 }
 
-func (s *BookService) GetBook(ctx context.Context, id uint32) (*BookResult, error) {
+func (s *BookService) GetBook(ctx context.Context, id book.BookID) (*BookResult, error) {
 	b, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -46,7 +50,6 @@ func (s *BookService) GetBook(ctx context.Context, id uint32) (*BookResult, erro
 
 func (s *BookService) ListBooks(ctx context.Context, filter BookFilter) ([]*BookResult, error) {
 	books, err := s.repo.List(ctx, book.Filter{ID: filter.ID, ISBN: filter.ISBN})
-
 	if err != nil {
 		return nil, err
 	}
@@ -58,5 +61,11 @@ func (s *BookService) ListBooks(ctx context.Context, filter BookFilter) ([]*Book
 }
 
 func toResult(b *book.Book) *BookResult {
-	return &BookResult{ID: b.ID, Title: b.Title, ISBN: b.ISBN.String(), Price: b.Price}
+	return &BookResult{
+		ID:          b.ID,
+		Title:       b.Title,
+		ISBN:        b.ISBN.String(),
+		Price:       b.Price.Float64(),
+		ReleaseYear: b.ReleaseYear,
+	}
 }

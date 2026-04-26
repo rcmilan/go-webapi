@@ -8,13 +8,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func CorrelationID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.GetHeader("X-Correlation-ID")
 		if id == "" {
-			id = generateID()
+			// Prefer the OTel trace ID so correlation ID matches what Tempo stores.
+			if span := trace.SpanFromContext(c.Request.Context()); span.SpanContext().IsValid() {
+				id = span.SpanContext().TraceID().String()
+			} else {
+				id = generateID()
+			}
 		}
 
 		logger := slog.Default().With(slog.String("correlation_id", id))
@@ -32,14 +38,14 @@ func RequestLogger() gin.HandlerFunc {
 		method := c.Request.Method
 		path := c.Request.URL.Path
 
-		observability.FromContext(c.Request.Context()).Info("request started",
+		observability.FromContext(c.Request.Context()).InfoContext(c.Request.Context(), "request started",
 			slog.String("method", method),
 			slog.String("path", path),
 		)
 
 		c.Next()
 
-		observability.FromContext(c.Request.Context()).Info("request completed",
+		observability.FromContext(c.Request.Context()).InfoContext(c.Request.Context(), "request completed",
 			slog.String("method", method),
 			slog.String("path", path),
 			slog.Int("status", c.Writer.Status()),

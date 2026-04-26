@@ -24,6 +24,6 @@ func mapError(ctx context.Context, err error) error {
 	if errors.As(err, &conflict) {
 		return huma.Error409Conflict(conflict.Error())
 	}
-	observability.FromContext(ctx).Error("unhandled error", slog.String("error", err.Error()))
+	observability.FromContext(ctx).ErrorContext(ctx, "unhandled error", slog.String("error", err.Error()))
 	return huma.Error500InternalServerError("erro interno")
 }

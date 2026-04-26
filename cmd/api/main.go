@@ -6,6 +6,7 @@ import (
 	"bookstore-api/internal/infrastructure/persistence"
 	"bookstore-api/internal/interface/api"
 	"bookstore-api/internal/observability"
+	"context"
 	"log/slog"
 	"os"
 
@@ -14,10 +15,18 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humagin"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func main() {
-	observability.Setup()
+	ctx := context.Background()
+
+	shutdown, err := observability.Setup(ctx)
+	if err != nil {
+		slog.Error("falha ao inicializar observabilidade", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	defer shutdown()
 
 	dsn := "root:root_password@tcp(127.0.0.1:3306)/bookstore_db?charset=utf8mb4&parseTime=True&loc=Local"
 	client, err := ent.Open("mysql", dsn)
@@ -33,7 +42,12 @@ func main() {
 	recordHandler := api.NewRecordHandler()
 
 	r := gin.New()
-	r.Use(api.CorrelationID(), api.RequestLogger(), gin.Recovery())
+	r.Use(
+		otelgin.Middleware("bookstore-api"), // creates trace span — must be first
+		api.CorrelationID(),                 // derives correlation ID from trace ID
+		api.RequestLogger(),
+		gin.Recovery(),
+	)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "UP"})

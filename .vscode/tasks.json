@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "docker: start",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "problemMatcher": []
+    },
+    {
+      "label": "migrate: new",
+      "type": "shell",
+      "command": "go mod tidy && go generate ./ent/... && go run ./cmd/migrate && docker compose run --rm atlas migrate diff ${input:migrationName} --env docker && docker compose run --rm atlas migrate apply --env docker",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "migrationName",
+      "type": "promptString",
+      "description": "Migration name (e.g. add_author_field)"
+    }
+  ]
+}

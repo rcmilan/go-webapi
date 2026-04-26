@@ -1,4 +1,3 @@
-// internal/domain/book/isbn.go
 package book
 
 import "errors"
@@ -9,7 +8,7 @@ type ISBN struct {
 
 func NewISBN(v string) (ISBN, error) {
 	if len(v) != 13 {
-		return ISBN{}, errors.New("ISBN inválido")
+		return ISBN{}, errors.New("ISBN inválido: deve possuir exatamente 13 dígitos")
 	}
 	return ISBN{value: v}, nil
 }

@@ -57,6 +57,14 @@ func (_c *BookCreate) SetReleaseYear(v int) *BookCreate {
 	return _c
 }
 
+// SetNillableReleaseYear sets the "release_year" field if the given value is not nil.
+func (_c *BookCreate) SetNillableReleaseYear(v *int) *BookCreate {
+	if v != nil {
+		_c.SetReleaseYear(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *BookCreate) SetID(v uint32) *BookCreate {
 	_c.mutation.SetID(v)
@@ -132,14 +140,6 @@ func (_c *BookCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Book.created_at"`)}
-	}
-	if _, ok := _c.mutation.ReleaseYear(); !ok {
-		return &ValidationError{Name: "release_year", err: errors.New(`ent: missing required field "Book.release_year"`)}
-	}
-	if v, ok := _c.mutation.ReleaseYear(); ok {
-		if err := book.ReleaseYearValidator(v); err != nil {
-			return &ValidationError{Name: "release_year", err: fmt.Errorf(`ent: validator failed for field "Book.release_year": %w`, err)}
-		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := book.IDValidator(v); err != nil {

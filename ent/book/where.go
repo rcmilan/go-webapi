@@ -328,6 +328,16 @@ func ReleaseYearLTE(v int) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldReleaseYear, v))
 }
 
+// ReleaseYearIsNil applies the IsNil predicate on the "release_year" field.
+func ReleaseYearIsNil() predicate.Book {
+	return predicate.Book(sql.FieldIsNull(FieldReleaseYear))
+}
+
+// ReleaseYearNotNil applies the NotNil predicate on the "release_year" field.
+func ReleaseYearNotNil() predicate.Book {
+	return predicate.Book(sql.FieldNotNull(FieldReleaseYear))
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Book) predicate.Book {
 	return predicate.Book(sql.AndPredicates(predicates...))

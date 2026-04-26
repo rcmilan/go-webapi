@@ -54,7 +54,14 @@ Do this every time you change a schema file under `ent/schema/`.
 
 # 2. Regenerate the Ent Go code
 go generate ./ent/...
+```
 
+> **Stop here if `go generate` fails.** A common failure is a `displaywidth` compile error
+> caused by `go mod tidy` downgrading a dependency that is incompatible with Go 1.26.
+> Fix it by running `go get github.com/clipperhouse/displaywidth@v0.11.0` and retrying.
+> Do not proceed to the next steps with a broken generate — `cmd/migrate` will panic.
+
+```bash
 # 3. Sync the new schema into bookstore_dev
 go run ./cmd/migrate
 
@@ -70,6 +77,24 @@ docker compose run --rm atlas migrate apply --env docker
 ```
 
 Steps 2 and 3 are also available as VS Code tasks (`ent: generate` and `migrate: sync dev db`).
+
+### Why `go mod tidy` can break `go generate`
+
+`go mod tidy` removes dependencies it considers unnecessary. `displaywidth` is a transitive
+dependency of the Ent code generator — it is only used at code-gen time, not at runtime.
+When tidy runs, it can downgrade it from `v0.11.0` back to `v0.6.2`, which fails to compile
+on Go 1.26.
+
+`tools/tools.go` exists to prevent this. It imports `displaywidth` and `entgo.io/ent/entc`
+under a `//go:build tools` tag — the file is never compiled into the binary, but `go mod tidy`
+sees the imports and keeps both packages pinned at their correct versions.
+
+If you ever see the downgrade happen again, run:
+
+```bash
+go get github.com/clipperhouse/displaywidth@v0.11.0
+go mod tidy
+```
 
 ---
 

@@ -2,55 +2,28 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "docker: start mysql",
+      "label": "docker: start",
       "type": "shell",
       "command": "docker compose up -d",
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared"
-      },
       "problemMatcher": []
     },
     {
-      "label": "docker: stop mysql",
+      "label": "docker: stop",
       "type": "shell",
       "command": "docker compose down",
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared"
-      },
       "problemMatcher": []
     },
     {
       "label": "ent: generate",
       "type": "shell",
       "command": "go generate ./ent/...",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
       "problemMatcher": "$go"
     },
     {
       "label": "migrate: sync dev db",
       "type": "shell",
       "command": "go run ./cmd/migrate",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
       "problemMatcher": []
-    },
-    {
-      "label": "build",
-      "type": "shell",
-      "command": "go build ./...",
-      "dependsOn": ["ent: generate"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": "$go"
     }
   ]
 }

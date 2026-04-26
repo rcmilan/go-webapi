@@ -22,6 +22,6 @@ func (Book) Fields() []ent.Field {
 		field.Int64("created_at").
 			Immutable().
 			DefaultFunc(func() int64 { return time.Now().Unix() }),
-		field.Int("release_year").Positive(),
+		field.Int("release_year").Optional(),
 	}
 }

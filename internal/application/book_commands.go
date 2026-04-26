@@ -13,8 +13,9 @@ type BookFilter struct {
 }
 
 type BookResult struct {
-	ID    uint32
-	Title string
-	ISBN  string
-	Price float64
+	ID          uint32
+	Title       string
+	ISBN        string
+	Price       float64
+	ReleaseYear int
 }

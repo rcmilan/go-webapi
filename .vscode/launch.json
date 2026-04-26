@@ -9,7 +9,7 @@
       "program": "${workspaceFolder}/cmd/api",
       "env": {},
       "args": [],
-      "preLaunchTask": "docker: start mysql"
+      "preLaunchTask": "docker: start"
     }
   ]
 }

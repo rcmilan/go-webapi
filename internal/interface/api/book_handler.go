@@ -65,7 +65,7 @@ type listBooksOutput struct {
 // ── Mappers ──────────────────────────────────────────────────────────────────
 
 func toBookDTO(r *application.BookResult) bookDTO {
-	return bookDTO{ID: r.ID, Title: r.Title, ISBN: r.ISBN, Price: r.Price}
+	return bookDTO{ID: r.ID, Title: r.Title, ISBN: r.ISBN, Price: r.Price, ReleaseYear: r.ReleaseYear}
 }
 
 func toBookDTOs(results []*application.BookResult) []bookDTO {
@@ -80,9 +80,10 @@ func toBookDTOs(results []*application.BookResult) []bookDTO {
 
 func (h *BookHandler) createBook(ctx context.Context, input *createBookInput) (*createBookOutput, error) {
 	result, err := h.service.RegisterBook(ctx, application.RegisterBookCommand{
-		Title: input.Body.Title,
-		ISBN:  input.Body.ISBN,
-		Price: input.Body.Price,
+		Title:       input.Body.Title,
+		ISBN:        input.Body.ISBN,
+		Price:       input.Body.Price,
+		ReleaseYear: input.Body.ReleaseYear,
 	})
 	if err != nil {
 		return nil, mapError(err)

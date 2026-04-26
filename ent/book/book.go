@@ -54,8 +54,6 @@ var (
 	PriceValidator func(float64) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() int64
-	// ReleaseYearValidator is a validator for the "release_year" field. It is called by the builders before save.
-	ReleaseYearValidator func(int) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )

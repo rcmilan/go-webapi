@@ -97,6 +97,12 @@ func (_u *BookUpdate) AddReleaseYear(v int) *BookUpdate {
 	return _u
 }
 
+// ClearReleaseYear clears the value of the "release_year" field.
+func (_u *BookUpdate) ClearReleaseYear() *BookUpdate {
+	_u.mutation.ClearReleaseYear()
+	return _u
+}
+
 // Mutation returns the BookMutation object of the builder.
 func (_u *BookUpdate) Mutation() *BookMutation {
 	return _u.mutation
@@ -146,11 +152,6 @@ func (_u *BookUpdate) check() error {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Book.price": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ReleaseYear(); ok {
-		if err := book.ReleaseYearValidator(v); err != nil {
-			return &ValidationError{Name: "release_year", err: fmt.Errorf(`ent: validator failed for field "Book.release_year": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -183,6 +184,9 @@ func (_u *BookUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedReleaseYear(); ok {
 		_spec.AddField(book.FieldReleaseYear, field.TypeInt, value)
+	}
+	if _u.mutation.ReleaseYearCleared() {
+		_spec.ClearField(book.FieldReleaseYear, field.TypeInt)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -274,6 +278,12 @@ func (_u *BookUpdateOne) AddReleaseYear(v int) *BookUpdateOne {
 	return _u
 }
 
+// ClearReleaseYear clears the value of the "release_year" field.
+func (_u *BookUpdateOne) ClearReleaseYear() *BookUpdateOne {
+	_u.mutation.ClearReleaseYear()
+	return _u
+}
+
 // Mutation returns the BookMutation object of the builder.
 func (_u *BookUpdateOne) Mutation() *BookMutation {
 	return _u.mutation
@@ -336,11 +346,6 @@ func (_u *BookUpdateOne) check() error {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Book.price": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ReleaseYear(); ok {
-		if err := book.ReleaseYearValidator(v); err != nil {
-			return &ValidationError{Name: "release_year", err: fmt.Errorf(`ent: validator failed for field "Book.release_year": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -390,6 +395,9 @@ func (_u *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) {
 	}
 	if value, ok := _u.mutation.AddedReleaseYear(); ok {
 		_spec.AddField(book.FieldReleaseYear, field.TypeInt, value)
+	}
+	if _u.mutation.ReleaseYearCleared() {
+		_spec.ClearField(book.FieldReleaseYear, field.TypeInt)
 	}
 	_node = &Book{config: _u.config}
 	_spec.Assign = _node.assignValues

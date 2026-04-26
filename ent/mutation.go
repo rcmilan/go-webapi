@@ -384,10 +384,24 @@ func (m *BookMutation) AddedReleaseYear() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearReleaseYear clears the value of the "release_year" field.
+func (m *BookMutation) ClearReleaseYear() {
+	m.release_year = nil
+	m.addrelease_year = nil
+	m.clearedFields[book.FieldReleaseYear] = struct{}{}
+}
+
+// ReleaseYearCleared returns if the "release_year" field was cleared in this mutation.
+func (m *BookMutation) ReleaseYearCleared() bool {
+	_, ok := m.clearedFields[book.FieldReleaseYear]
+	return ok
+}
+
 // ResetReleaseYear resets all changes to the "release_year" field.
 func (m *BookMutation) ResetReleaseYear() {
 	m.release_year = nil
 	m.addrelease_year = nil
+	delete(m.clearedFields, book.FieldReleaseYear)
 }
 
 // Where appends a list predicates to the BookMutation builder.
@@ -589,7 +603,11 @@ func (m *BookMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *BookMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(book.FieldReleaseYear) {
+		fields = append(fields, book.FieldReleaseYear)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -602,6 +620,11 @@ func (m *BookMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *BookMutation) ClearField(name string) error {
+	switch name {
+	case book.FieldReleaseYear:
+		m.ClearReleaseYear()
+		return nil
+	}
 	return fmt.Errorf("unknown Book nullable field %s", name)
 }
 

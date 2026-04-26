@@ -22,9 +22,30 @@
       "problemMatcher": []
     },
     {
+      "label": "ent: generate",
+      "type": "shell",
+      "command": "go generate ./ent/...",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": "$go"
+    },
+    {
+      "label": "migrate: sync dev db",
+      "type": "shell",
+      "command": "go run ./cmd/migrate",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "build",
       "type": "shell",
       "command": "go build ./...",
+      "dependsOn": ["ent: generate"],
       "group": {
         "kind": "build",
         "isDefault": true

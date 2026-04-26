@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go get *)",
+      "Bash(go mod *)",
+      "Bash(go generate *)",
+      "Bash(atlas version *)",
+      "Bash(curl -sSf https://atlasgo.sh)",
+      "Bash(sh)",
+      "Bash(go install *)",
+      "Bash(docker compose *)",
+      "Bash(go build *)",
+      "Bash(\"/c/Users/suporte/go/bin/atlas.exe\" version *)",
+      "Bash(\"/c/Users/suporte/go/bin/atlas.exe\" migrate *)",
+      "Bash(go run *)"
+    ]
+  }
+}
